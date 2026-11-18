@@ -1,0 +1,265 @@
+/*
+ * Hero ARCHISTUDIO: одна фотография сквозь 4 окна.
+ * Геометрия — на container query units сцены (cqw/cqh), поэтому фото
+ * в каждом окне сдвинуто ровно на позицию окна и читается как единый кадр.
+ * Высота ~113svh: под подзаголовком — две продающие кнопки.
+ */
+.hero {
+  position: relative;
+  height: 113svh;
+  min-height: 720px;
+  max-height: 1320px;
+  background: var(--color-graphite);
+  color: #fff;
+  overflow: clip;
+}
+
+.stage {
+  position: absolute;
+  inset: var(--gutter) var(--gutter) calc(var(--gutter) + 8px);
+  container-type: size;
+  --n: 4;
+  --g: clamp(8px, 0.95vw, 15px);
+  --cw: calc((100cqw - (var(--n) - 1) * var(--g)) / var(--n));
+}
+
+.win {
+  position: absolute;
+  left: calc(var(--c) * (var(--cw) + var(--g)));
+  top: calc(var(--t) * 1cqh);
+  width: var(--cw);
+  height: calc((var(--b) - var(--t)) * 1cqh);
+  border-radius: var(--radius-window);
+  overflow: hidden;
+  /* окна отрисованы сразу (под прелоадером); прячет их скрипт в момент ухода прелоадера */
+  clip-path: inset(0% 0% 0% 0% round 28px);
+  background: #202328;
+  transform: translateZ(0);
+}
+
+.photoWrap {
+  position: absolute;
+  left: calc(var(--c) * (var(--cw) + var(--g)) * -1);
+  top: calc(var(--t) * -1cqh);
+  width: 100cqw;
+  height: 100cqh;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 60%;
+}
+
+/* Плейсхолдер фото: один спокойный графитовый «кадр» на всю сцену — читается сквозь все окна */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 55% 45%, rgb(255 255 255 / 0.05), transparent 70%),
+    linear-gradient(170deg, #2a2d32 0%, #1f2226 55%, #191b1f 100%);
+}
+.phCaption {
+  position: absolute;
+  inset: auto 0 50% 0;
+  transform: translateY(50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 14px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.6);
+}
+.phSize {
+  font-family: var(--font-brand);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgb(255 255 255 / 0.35);
+}
+.mobileOnly {
+  display: none;
+}
+
+/* тонкий светлый stroke + мягкое затемнение снизу для читаемости */
+.shade {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  background: linear-gradient(180deg, rgb(22 24 27 / 0.28) 0%, transparent 18%, transparent 70%, rgb(22 24 27 / 0.22) 100%);
+}
+
+.copy {
+  position: absolute;
+  left: 0;
+  top: 70.5cqh;
+  width: calc(2 * var(--cw) + var(--g));
+}
+
+.logo {
+  font-family: var(--font-brand);
+  font-weight: 700;
+  /* стартовый размер; точная подгонка под ширину колонок 1–2 — в Hero.tsx */
+  font-size: calc((2 * var(--cw) + var(--g)) / 6.55);
+  line-height: 0.82;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+  width: max-content;
+  margin-left: -0.04em;
+}
+
+.subtitle {
+  margin-top: clamp(10px, 1.4cqh, 16px);
+  font-size: clamp(13px, 1.05vw, 17px);
+  line-height: 1.35;
+  color: rgb(255 255 255 / 0.55);
+  max-width: 34em;
+}
+
+.actions {
+  margin-top: clamp(14px, 2cqh, 24px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ctaWrap {
+  display: inline-flex;
+}
+
+/* Основная: светлая пилюля + кружок со стрелкой */
+.ctaPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 52px;
+  padding: 0 6px 0 24px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-graphite);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--dur-hover) var(--ease-ui), box-shadow var(--dur-hover) var(--ease-ui);
+}
+.ctaPrimary:hover {
+  background: var(--color-surface);
+  box-shadow: 0 14px 40px -14px rgb(0 0 0 / 0.6);
+}
+.ctaDot {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--color-graphite);
+  color: #fff;
+}
+
+/* Второстепенная: прозрачная, тонкая обводка, текст + стрелка (уезжает вправо на hover) */
+.ctaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color var(--dur-hover) var(--ease-ui), background-color var(--dur-hover) var(--ease-ui);
+}
+.ctaSecondary:hover {
+  border-color: rgb(255 255 255 / 0.7);
+  background: rgb(255 255 255 / 0.04);
+}
+
+.words {
+  position: absolute;
+  right: 0;
+  /* плотная стопка, прижата к низу 3-го окна — как в ARCHISTUDIO */
+  bottom: 4cqh;
+  width: calc(var(--cw) * 1.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.14em;
+  align-items: flex-end;
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(16px, min(2.05vw, 4.2cqh), 34px);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.word {
+  color: #fff;
+}
+.wordDim {
+  color: rgb(255 255 255 / 0.56);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .win {
+    opacity: 0;
+  }
+}
+
+/* ---------- Mobile: 2 окна, логотип на всю ширину, кнопки в столбик, слова строкой ---------- */
+@media (max-width: 767px) {
+  .hero {
+    min-height: 660px;
+  }
+  .stage {
+    --n: 2;
+  }
+  .desktopOnly {
+    display: none;
+  }
+  .mobileOnly {
+    display: flex;
+  }
+  .win[data-win="0"] {
+    --t: 9 !important;
+    --b: 55 !important;
+  }
+  .win[data-win="1"] {
+    --t: 13 !important;
+    --b: 47 !important;
+  }
+  .copy {
+    top: auto;
+    bottom: 40px;
+    width: 100cqw;
+  }
+  .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .ctaWrap,
+  .ctaPrimary,
+  .ctaSecondary {
+    width: 100%;
+  }
+  .ctaPrimary {
+    justify-content: space-between;
+  }
+  .words {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px 12px;
+    font-size: clamp(12px, 3.5vw, 16px);
+  }
+}
